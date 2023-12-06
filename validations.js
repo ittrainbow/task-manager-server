@@ -1,13 +1,21 @@
 import { body } from 'express-validator'
 
-export const signup = [
-  body('email').isEmail(),
-  body('password').isLength({ min: 3 }),
-  body('name').isLength({ min: 3 })
+export const createTask = [
+  body('creator').isLength({ min: 24 }),
+  body('comments').isArray(),
+  body('name').isLength({ min: 1 }),
+  body('description').isLength({ min: 1 }),
+  body('deadline').isNumeric(),
+  body('status').isString(),
+  body('assigned').isLength({ min: 24 })
 ]
 
-export const login = [body('email').isEmail(), body('password').isLength({ min: 2 })]
+export const updateTask = [
+  body('comments').isArray(),
+  body('deadline').isNumeric(),
+  body('assigned').isLength({ min: 24 }),
+  body('_id').isLength({ min: 24 }),
+  body('status').isString()
+]
 
-export const auth = [body('token').isLength({ min: 128 })]
-
-export const update = [body('uid').isLength({ min: 10 }), body('name').isLength({ min: 2 })]
+export const removeTask = [body('_id').isLength({ min: 24 })]

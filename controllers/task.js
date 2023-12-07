@@ -41,3 +41,8 @@ export const getAll = async (_, res) => {
   const cursor = await tasks.find().toArray()
   return res.status(200).json(cursor)
 }
+
+export const getOne = async (req, res) => {
+  const task = await tasks.findOne({ _id: new ObjectId(req.body._id) })
+  return res.status(200).json(task)
+}

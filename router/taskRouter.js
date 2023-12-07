@@ -11,4 +11,6 @@ taskRouter.post('/update', validate.updateTask, TaskController.update)
 
 taskRouter.post('/remove', validate.removeTask, TaskController.remove)
 
+taskRouter.post('/getOne', validate.getOneTask, TaskController.getOne)
+
 taskRouter.get('/getAll', TaskController.getAll)

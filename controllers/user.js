@@ -1,13 +1,15 @@
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import bcrypt from 'bcrypt'
+import crypto from 'crypto'
+import nodemailer from 'nodemailer'
 import { ObjectId } from 'mongodb'
 
 import { users } from '../index.js'
 
 dotenv.config()
 
-const { SECRET_KEY } = process.env
+const { SECRET_KEY, EMAIL_USER, EMAIL_PASSWORD, EMAIL_HOST, EMAIL_PORT, EMAIL_NAME } = process.env
 
 const createToken = ({ id, email }) => {
   return jwt.sign({ id, email }, SECRET_KEY)
@@ -53,7 +55,7 @@ export const tokenAuth = async (req, res, next) => {
     if (error) return next(res.status(401).json(`user.auth: ${error.message}`))
     const findUser = await users.findOne({ email: user.email }, { projection: { _id: 1, token: 1, name: 1, email: 1 } })
     const { email, name, _id } = findUser
-    const token = createToken(user)
+    const token = createToken(findUser)
     users.updateOne({ email: user.email }, { $set: { token } })
     const responseUser = { name, email, token, _id: _id.toString() }
     return res.status(200).json(responseUser)
@@ -70,3 +72,39 @@ export const update = async (req, res) => {
   await users.updateOne({ _id: new ObjectId(req.body._id) }, { $set: { name } })
   return res.status(200).json('OK')
 }
+
+// export const recover = async (req, res, next) => {
+//   const { email } = req.body
+//   if (!email) return res.status(401).json({ errorMessage: 'Provide email' })
+
+//   const user = await users.findOne({ email })
+//   if (!user) return res.status(401).json({ errorMessage: 'User not found' })
+
+//   const resetToken = crypto.randomBytes(32).toString('hex')
+//   const salt = await bcrypt.genSalt(10)
+//   const hash = await bcrypt.hash(resetToken, Number(salt))
+//   const link = `http://localhost:3000/api/passwordReset?token=${resetToken}&id=${user._id}`
+
+//   const transporter = nodemailer.createTransport({
+//     host: 'smtp.ethereal.email',
+//     port: 587,
+//     auth: {
+//       user: 'astrid.hamill90@ethereal.email',
+//       pass: 'C54kFPXS48shhu8TPq'
+//     }
+//   })
+
+//   const emailOptions = {
+//     from: 'Drew<deadbead@gmail.com>',
+//     to: email,
+//     subject: 'Recover password',
+//     text: 'text'
+//   }
+
+//   await transporter.sendMail(emailOptions, (error, info) => {
+//     if (error) console.log('error', error)
+//     else console.log('info', info)
+//   })
+
+//   return res.status(200).json(link)
+// }

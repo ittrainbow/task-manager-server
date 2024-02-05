@@ -7,10 +7,10 @@ import { MongoClient } from 'mongodb'
 
 dotenv.config()
 
-const { PORT, MONGO_URL, MONGO_INTERNAL_URL } = process.env
+const { PORT, MONGO_URL, MONGO_URL_NEW } = process.env
 const app = express()
 
-export const mongo = new MongoClient(MONGO_INTERNAL_URL)
+export const mongo = new MongoClient(MONGO_URL_NEW)
 await mongo
   .connect()
   .then(() => console.log('DB connected'))

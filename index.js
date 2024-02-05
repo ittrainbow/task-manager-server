@@ -1,6 +1,6 @@
 import express from 'express'
 import dotenv from 'dotenv'
-// import cors from 'cors'
+import cors from 'cors'
 
 import { appRouter } from './router/index.js'
 import { MongoClient } from 'mongodb'
@@ -21,7 +21,7 @@ export const users = db.collection('users')
 export const tasks = db.collection('tasks')
 
 app.use(express.json())
-// app.use(cors())
+app.use(cors())
 
 app.get('/', (_, res) => res.status(200).json({ message: 'server is up!' }))
 

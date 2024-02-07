@@ -1,4 +1,4 @@
-import graphql from 'graphql'
+import graphql, { GraphQLBoolean, GraphQLFloat } from 'graphql'
 
 const { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLList } = graphql
 
@@ -18,6 +18,29 @@ export const UsersType = new GraphQLObjectType({
   })
 })
 
+export const TaskType = new GraphQLObjectType({
+  name: 'Task',
+  fields: () => ({
+    assigned: { type: GraphQLString },
+    comments: { type: new GraphQLList(GraphQLString) },
+    creator: { type: GraphQLString },
+    deadline: { type: GraphQLFloat },
+    description: { type: GraphQLString },
+    name: { type: GraphQLString },
+    status: { type: GraphQLString },
+    _id: { type: GraphQLString },
+    created: { type: GraphQLFloat },
+    updated: { type: GraphQLFloat }
+  })
+})
+
+export const TasksType = new GraphQLObjectType({
+  name: 'Tasks',
+  fields: () => ({
+    tasks: { type: new GraphQLList(TaskType) }
+  })
+})
+
 export const AuthType = new GraphQLObjectType({
   name: 'Auth',
   fields: () => ({
@@ -29,7 +52,7 @@ export const AuthType = new GraphQLObjectType({
   })
 })
 
-export const UpdateType = new GraphQLObjectType({
+export const UpdateUserType = new GraphQLObjectType({
   name: 'UpdateUser',
   fields: () => ({
     name: { type: GraphQLString },
@@ -37,17 +60,18 @@ export const UpdateType = new GraphQLObjectType({
   })
 })
 
-export const TaskType = new GraphQLObjectType({
-  name: 'Task',
+export const UpdateTaskType = new GraphQLObjectType({
+  name: 'UpdateTask',
   fields: () => ({
-    creator: { type: GraphQLString },
-    created: { type: GraphQLInt },
-    assigned: { type: GraphQLString },
-    deadline: { type: GraphQLInt },
-    description: { type: GraphQLString },
-    name: { type: GraphQLString },
-    modified: { type: GraphQLInt },
-    status: { type: GraphQLString },
-    comments: { type: new GraphQLList(GraphQLString) }
+    updated: { type: GraphQLFloat },
+    error: { type: GraphQLString }
+  })
+})
+
+export const DeleteTaskType = new GraphQLObjectType({
+  name: 'DeleteTask',
+  fields: () => ({
+    deleted: { type: GraphQLBoolean },
+    error: { type: GraphQLString }
   })
 })

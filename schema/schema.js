@@ -1,4 +1,4 @@
-import graphql, { GraphQLList } from 'graphql'
+import graphql, { GraphQLFloat } from 'graphql'
 import _ from 'lodash'
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
@@ -12,7 +12,7 @@ dotenv.config()
 
 const { SECRET_KEY } = process.env
 
-const { GraphQLObjectType, GraphQLID, GraphQLString, GraphQLSchema } = graphql
+const { GraphQLObjectType, GraphQLString, GraphQLSchema, GraphQLList } = graphql
 
 const createToken = (email) => {
   const obj = { email, date: new Date().getTime() }
@@ -25,17 +25,18 @@ const Query = new GraphQLObjectType({
     getUsers: {
       type: Types.UsersType,
       args: {},
-      resolve: async (parent, args) => {
+      resolve: async () => {
         const users = await User.find({}).exec()
         return { users }
       }
     },
 
     getTasks: {
-      type: Types.TaskType,
-      args: { _id: { type: GraphQLID } },
-      resolve: (parent, args) => {
-        // return _.find(authors, { id: Number(args.id) })
+      type: Types.TasksType,
+      args: {},
+      resolve: async () => {
+        const tasks = await Task.find({}).exec()
+        return { tasks }
       }
     }
   }
@@ -82,6 +83,7 @@ const Mutation = new GraphQLObjectType({
       args: { token: { type: GraphQLString } },
       resolve: async (parent, args) => {
         const { token } = args
+
         if (token) {
           const result = jwt.verify(token, SECRET_KEY, async (error, user) => {
             if (error) return { error: 'Token not valid' }
@@ -99,16 +101,61 @@ const Mutation = new GraphQLObjectType({
     },
 
     userUpdate: {
-      type: Types.UpdateType,
+      type: Types.UpdateUserType,
       args: { name: { type: GraphQLString }, _id: { type: GraphQLString } },
       resolve: async (parent, args) => {
         const { name, _id } = args
-        try {
-          await User.updateOne({ _id }, { $set: { name } }).exec()
-          return { name }
-        } catch (error) {
-          return { error }
-        }
+        await User.updateOne({ _id }, { $set: { name } }).exec()
+
+        return { name }
+      }
+    },
+
+    taskCreate: {
+      type: Types.TaskType,
+      args: {
+        assigned: { type: GraphQLString },
+        creator: { type: GraphQLString },
+        deadline: { type: GraphQLFloat },
+        description: { type: GraphQLString },
+        name: { type: GraphQLString }
+      },
+      resolve: async (parent, args) => {
+        const date = new Date().getTime()
+        const task = new Task({ ...args, comments: [], status: 'new', created: date, updated: date })
+
+        return task.save()
+      }
+    },
+
+    taskUpdate: {
+      type: Types.UpdateTaskType,
+      args: {
+        _id: { type: GraphQLString },
+        assigned: { type: GraphQLString },
+        comments: { type: new GraphQLList(GraphQLString) },
+        deadline: { type: GraphQLFloat },
+        status: { type: GraphQLString }
+      },
+      resolve: async (parent, args) => {
+        const { _id, assigned, comments, deadline, status } = args
+        const updated = new Date().getTime()
+        await Task.updateOne(
+          { _id },
+          { $set: { assigned, comments, deadline, status, updated: new Date().getTime() } }
+        ).exec()
+
+        return { updated }
+      }
+    },
+
+    taskDelete: {
+      type: Types.DeleteTaskType,
+      args: { _id: { type: GraphQLString } },
+      resolve: async (parent, args) => {
+        const { _id } = args
+        await Task.deleteOne({ _id }).exec()
+        return { deleted: true }
       }
     }
   }

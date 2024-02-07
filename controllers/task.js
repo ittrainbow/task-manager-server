@@ -11,7 +11,7 @@ export const create = async (req, res) => {
   if (!errors.isEmpty()) return res.status(400).json(errors.array())
 
   const time = new Date().getTime()
-  const newTask = { ...req.body, created: time, modified: time }
+  const newTask = { ...req.body, created: time, updated: time }
   const task = await tasks.insertOne(newTask)
   return res.status(200).json({ ...task, time })
 }
@@ -21,12 +21,12 @@ export const update = async (req, res, next) => {
   if (!errors.isEmpty()) return res.status(400).json(errors.array())
 
   const { comments, deadline, status, assigned } = req.body
-  const modified = new Date().getTime()
+  const updated = new Date().getTime()
   await tasks.updateOne(
     { _id: new ObjectId(req.body._id) },
-    { $set: { comments, deadline, status, assigned, modified } }
+    { $set: { comments, deadline, status, assigned, updated } }
   )
-  return res.status(200).json({ modified })
+  return res.status(200).json({ updated })
 }
 
 export const remove = async (req, res, next) => {
